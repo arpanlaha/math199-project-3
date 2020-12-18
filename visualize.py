@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 from matplotlib import cm
-import seaborn as sns
 from scipy.special import comb
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import numpy as np
@@ -61,21 +60,47 @@ def gen_grid(series, phs, pas):
 
 phs = np.linspace(0, 1, 100)
 pas = np.linspace(0, 1, 100)
+x, y = np.meshgrid(phs, pas)
 
-grid = np.array(gen_grid([1, 1, 0, 0, 1, 0, 1], phs, pas))
+def pad(num):
+    if num >= 100:
+        return ""
+    elif num >= 10:
+        return "0"
+    return "00"
 
-for angle in range(0,360,5):
-    fig = plt.figure(figsize=(12, 8))
-    ax = fig.gca(projection='3d')
-    surf = ax.plot_surface(phs, pas, grid, rstride=1, cstride=1,cmap='viridis', edgecolor='none')
+def plot(series, name):
+    grid = np.array(gen_grid(series, phs, pas))
+    print("Starting " + name)
 
-    ax.view_init(30,angle)
-    # Add a color bar which maps values to colors.
-    fig.colorbar(surf, shrink=0.5, aspect=5)
-    
-#     plt.show()
-    filename='images/2-2/' + str(angle)+'.png'
-    plt.savefig(filename, dpi=96)
-    plt.gca()
-    print(angle)
-    plt.close()
+    for angle in range(0,360,5):
+        fig = plt.figure(figsize=(8, 6))
+        ax = fig.gca(projection='3d')
+        surf = ax.plot_surface(x, y, grid, rstride=1, cstride=1,cmap='viridis', edgecolor='none', antialiased=False)
+
+        ax.view_init(15,angle)
+        # Add a color bar which maps values to colors.
+        bar = fig.colorbar(surf, shrink=0.5, aspect=5)
+        bar.set_label("Expected series length")
+        ax.set_xlabel("Home win probability")
+        ax.set_ylabel("Away win probability")
+        ax.set_zlabel("Expected series length")
+        plt.title(name + " Expected Series Length")
+        
+    #     plt.show()
+        filename='images/' + name + "/" + pad(angle) + str(angle)+'.png'
+        plt.savefig(filename, dpi=96)
+        plt.gca()
+        
+        print(angle)
+        plt.close()
+
+series_2_2 = [1, 1, 0, 0, 1, 0, 1]
+series_2_3 = [1, 1, 0, 0, 0, 1, 1]
+series_2_1 = [1, 1, 0, 1, 0, 0, 1]
+series_1_3 = [1, 0, 0, 0, 1, 1, 1]
+
+plot(series_2_2, "2-2")
+plot(series_2_1, "2-1")
+plot(series_2_3, "2-3")
+plot(series_1_3, "1-3")
